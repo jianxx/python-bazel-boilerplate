@@ -8,4 +8,4 @@ manifest:
   pip_repository:
     name: pip
     use_pip_repository_aliases: true
-integrity: 34bf4fb68906b000c1d970b67b28ab8ed837cf87917598944b26d4f85cabfecd
+integrity: 3004e950b1909a3bad06e238c031f79851baf82eda5bb19534c6410a4b74209b

@@ -1,0 +1,29 @@
+load("@pip//:requirements.bzl", "all_whl_requirements")
+load("@rules_python//python:pip.bzl", "compile_pip_requirements")
+load("@rules_python_gazelle_plugin//modules_mapping:def.bzl", "modules_mapping")
+
+compile_pip_requirements(
+    name = "requirements",
+    extra_args = ["--allow-unsafe"],
+    requirements_in = "//:requirements.txt",
+    requirements_txt = "//third_party/py:requirements_lock.txt",
+)
+
+# This repository rule fetches the metadata for python packages we
+# depend on. That data is required for the gazelle_python_manifest
+# rule to update our manifest file.
+# To see what this rule does, try `bazel run @modules_map//:print`
+modules_mapping(
+    name = "modules_map",
+    exclude_patterns = [
+        "^_|(\\._)+",  # This is the default.
+        "(\\.tests)+",  # Add a custom one to get rid of the psutil tests.
+    ],
+    visibility = ["//:__pkg__"],
+    wheels = all_whl_requirements,
+)
+
+exports_files(
+    ["requirements_lock.txt"],
+    visibility = ["//:__pkg__"],
+)

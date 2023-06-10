@@ -1,56 +1,13 @@
 # Set the name of the bazel workspace.
 workspace(name = "python_bazel_boilerplate")
 
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+load("//third_party:deps.bzl", "dependencies")
 
-# Download the rules_go and bazel_gazelle ruleset for augo-generating BUILD files.
-http_archive(
-    name = "io_bazel_rules_go",
-    sha256 = "6b65cb7917b4d1709f9410ffe00ecf3e160edf674b78c54a894471320862184f",
-    urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/rules_go/releases/download/v0.39.0/rules_go-v0.39.0.zip",
-        "https://github.com/bazelbuild/rules_go/releases/download/v0.39.0/rules_go-v0.39.0.zip",
-    ],
-)
+dependencies()
 
-http_archive(
-    name = "bazel_gazelle",
-    sha256 = "ecba0f04f96b4960a5b250c8e8eeec42281035970aa8852dda73098274d14a1d",
-    urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/bazel-gazelle/releases/download/v0.29.0/bazel-gazelle-v0.29.0.tar.gz",
-        "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.29.0/bazel-gazelle-v0.29.0.tar.gz",
-    ],
-)
+load("//third_party:install.bzl", "install_gazelle_dependencies")
 
-# Load rules_go ruleset and expose the toolchain and dep rules.
-load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies")
-load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
-
-# go_rules_dependencies is a function that registers external dependencies needed by the Go rules.
-# See: https://github.com/bazelbuild/rules_go/blob/master/go/dependencies.rst#go_rules_dependencies
-go_rules_dependencies()
-
-# go_rules_dependencies is a function that registers external dependencies needed by the Go rules.
-# See: https://github.com/bazelbuild/rules_go/blob/master/go/dependencies.rst#go_rules_dependencies
-go_register_toolchains(version = "1.19.4")
-
-# The following call configured the gazelle dependencies, Go environment and Go SDK.
-gazelle_dependencies()
-
-# Set up rules_python.
-http_archive(
-    name = "rules_python",
-    sha256 = "94750828b18044533e98a129003b6a68001204038dc4749f40b195b24c38f49f",
-    strip_prefix = "rules_python-0.21.0",
-    url = "https://github.com/bazelbuild/rules_python/releases/download/0.21.0/rules_python-0.21.0.tar.gz",
-)
-
-http_archive(
-    name = "rules_python_gazelle_plugin",
-    sha256 = "94750828b18044533e98a129003b6a68001204038dc4749f40b195b24c38f49f",
-    strip_prefix = "rules_python-0.21.0/gazelle",
-    url = "https://github.com/bazelbuild/rules_python/releases/download/0.21.0/rules_python-0.21.0.tar.gz",
-)
+install_gazelle_dependencies()
 
 # Next we load the toolchain from rules_python.
 load("@rules_python//python:repositories.bzl", "python_register_toolchains")
@@ -59,12 +16,12 @@ load("@rules_python//python:repositories.bzl", "python_register_toolchains")
 # This toolchain will allow bazel to download a specific python version, and use that version
 # for compilation.
 python_register_toolchains(
-    name = "python38",
+    name = "python_interpreter",
     python_version = "3.8",
 )
 
 # Load the interpreter and pip_parse rules.
-load("@python38//:defs.bzl", "interpreter")
+load("@python_interpreter//:defs.bzl", "interpreter")
 load("@rules_python//python:pip.bzl", "pip_parse")
 
 # This macro wraps the `pip_repository` rule that invokes `pip`, with `incremental` set.
@@ -84,7 +41,7 @@ pip_parse(
     # Here, we use the interpreter constant that resolves to the host interpreter from the default Python toolchain.
     python_interpreter_target = interpreter,
     # Set the location of the lock file.
-    requirements_lock = "//:requirements_lock.txt",
+    requirements_lock = "//third_party/py:requirements_lock.txt",
 )
 
 # Load the install_deps macro.
