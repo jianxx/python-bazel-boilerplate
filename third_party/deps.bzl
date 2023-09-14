@@ -1,8 +1,8 @@
 """This file contains all bazel dependencies.
 
-Note that, all the dependencies are loaded without using
-maybe (https://docs.bazel.build/versions/master/repo/utils.html#maybe) to avoid being
-overridden to enforce [the single version rule](https://t2doc.woa.com/depot/tencent2/third_party).
+All the dependencies are loaded without using
+maybe (https://docs.bazel.build/versions/master/repo/utils.html#maybe) 
+to avoid being overridden to enforce the single version rule.
 """
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
